@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>KrishiDrishti • Live Weather Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --amber: #f5a623;
+    --text-dim: rgba(255,255,255,0.45);
+    --text-mid: rgba(255,255,255,0.65);
+    --card-bg: rgba(13,17,23,0.72);
+    --card-border: rgba(255,255,255,0.07);
+    --radius: 20px;
+    --radius-sm: 12px;
+    --error-glow: rgba(245,166,35,0.3);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    min-height:100vh; font-family:'DM Sans',sans-serif;
+    color:#fff; overflow-x:hidden;
+  }
+  /* Background image layer with dark overlay for readability */
+  .bg-layer {
+    position: fixed;
+    inset: 0;
+    background: url('Pic/G.jpg') center/cover no-repeat fixed;
+    z-index: 0;
+  }
+  .bg-layer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.62);
+    pointer-events: none;
+  }
+  /* Subtle animated orbs to add depth (keep them, but they will float above overlay) */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+  .orb-1 {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(245,166,35,0.2), transparent 70%);
+    top: -150px;
+    left: -150px;
+  }
+  .orb-2 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(16,185,129,0.15), transparent 70%);
+    bottom: -100px;
+    right: -100px;
+  }
+  .wrapper {
+    position: relative;
+    z-index: 10;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0 0;
+    margin-bottom: 36px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-icon {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, var(--amber), #e67e22);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+  }
+  .brand h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 700;
+  }
+  .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f59e0b, #059669);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .hero {
+    background: linear-gradient(120deg, rgba(245,166,35,0.12) 0%, rgba(16,185,129,0.08) 100%);
+    border: 1px solid rgba(245,166,35,0.2);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    backdrop-filter: blur(2px);
+  }
+  .hero h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+  .hero h2 span { color: var(--amber); }
+  .hero p {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: 28px;
+    margin-bottom: 14px;
+  }
+  .section-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+  .refresh-weather {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 30px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-mid);
+    cursor: pointer;
+    transition: 0.2s;
+    backdrop-filter: blur(4px);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .refresh-weather:hover {
+    background: rgba(245,166,35,0.25);
+    border-color: var(--amber);
+    color: #fff;
+  }
+  .weather-strip {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  .wcard {
+    flex: 1;
+    min-width: 120px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s;
+  }
+  .wicon { font-size: 22px; }
+  .wlabel {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+  }
+  .wval {
+    font-size: 17px;
+    font-weight: 600;
+    margin-top: 2px;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .unit {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-dim);
+  }
+  .weather-error {
+    background: rgba(245,166,35,0.12);
+    border-left: 3px solid var(--amber);
+    border-radius: var(--radius-sm);
+    padding: 12px 18px;
+    font-size: 13px;
+    color: var(--text-mid);
+    width: 100%;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .fcard {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 24px 22px;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(6px);
+  }
+  .fcard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.22s;
+  }
+  .fcard:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,255,255,0.2);
+  }
+  .fcard:hover::before { opacity: 1; }
+  .fcard.amber::before { background: radial-gradient(ellipse at top left, rgba(245,166,35,0.12), transparent 70%); }
+  .fcard.green::before { background: radial-gradient(ellipse at top left, rgba(16,185,129,0.12), transparent 70%); }
+  .fcard.blue::before  { background: radial-gradient(ellipse at top left, rgba(96,165,250,0.12), transparent 70%); }
+  .fcard-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    position: relative;
+    z-index: 1;
+  }
+  .fcard.amber .fcard-icon { background: rgba(245,166,35,0.18); }
+  .fcard.green .fcard-icon { background: rgba(16,185,129,0.15); }
+  .fcard.blue  .fcard-icon { background: rgba(96,165,250,0.15); }
+  .fcard-body { position: relative; z-index: 1; }
+  .fcard-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .fcard-desc  { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+  .fcard-tag {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+    align-self: flex-start;
+  }
+  .fcard.amber .fcard-tag { background: rgba(245,166,35,0.18); color: var(--amber); }
+  .fcard.green .fcard-tag { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+  .fcard.blue  .fcard-tag { background: rgba(96,165,250,0.15); color: #93c5fd; }
+
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .panel {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 22px;
+    backdrop-filter: blur(8px);
+  }
+  .panel-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .price-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .price-table tr {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .price-table tr:last-child { border-bottom: none; }
+  .price-table td {
+    padding: 10px 4px;
+    font-size: 13px;
+  }
+  .crop-name { color: var(--text-mid); }
+  .price-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .price-badge.up { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+  .price-badge.dn { background: rgba(248,113,113,0.18); color: #fca5a5; }
+
+  .advisory-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .adv-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .adv-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+  .adv-dot.amber { background: var(--amber); }
+  .adv-dot.green { background: #6ee7b7; }
+  .adv-dot.blue  { background: #60a5fa; }
+  .adv-title {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .adv-sub {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .last-updated {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-align: right;
+    margin-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 14px;
+  }
+
+  @media (max-width: 800px) {
+    .feature-grid { grid-template-columns: 1fr; }
+    .bottom-grid  { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 550px) {
+    .weather-strip .wcard { min-width: 100px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="wrapper">
+
+  <nav>
+    <div class="brand">
+      <div class="brand-icon">🌾</div>
+      <h1>KrishiDrishti</h1>
+    </div>
+    <div class="avatar">AS</div>
+  </nav>
+
+  <div class="hero">
+    <h2>Good morning, <span>Arjun</span> 🌤️</h2>
+    <p>Your Kharif season is on track. Real‑time weather from Delhi live feed.</p>
+  </div>
+
+  <!-- WEATHER SECTION with live refresh -->
+  <div class="section-header">
+    <div class="section-label">🌍 LIVE WEATHER · DELHI</div>
+    <div class="refresh-weather" id="refreshWeatherBtn">
+      ⟳ Refresh now
+    </div>
+  </div>
+  <div class="weather-strip" id="weatherStrip">
+    <div class="wcard"><span class="wicon">🌡️</span><div><div class="wlabel">Temperature</div><div class="wval" id="tempValue">—</div></div></div>
+    <div class="wcard"><span class="wicon">💧</span><div><div class="wlabel">Humidity</div><div class="wval" id="humidityValue">—</div></div></div>
+    <div class="wcard"><span class="wicon">🌧️</span><div><div class="wlabel">Rainfall (1h)</div><div class="wval" id="rainfallValue">—</div></div></div>
+    <div class="wcard"><span class="wicon">💨</span><div><div class="wlabel">Wind Speed</div><div class="wval" id="windValue">—</div></div></div>
+    <div class="wcard"><span class="wicon">☁️</span><div><div class="wlabel">Cloud Cover</div><div class="wval" id="cloudValue">—</div></div></div>
+  </div>
+  <!-- extra soil moisture + last sync row -->
+  <div class="weather-strip" style="margin-top:-8px; margin-bottom:24px;">
+    <div class="wcard" style="flex:0.8;"><span class="wicon">🌱</span><div><div class="wlabel">Soil Moisture</div><div class="wval" id="soilMoistureStatic">64% <span class="unit">(simulated)</span></div></div></div>
+    <div class="wcard" style="flex:1.2;"><span class="wicon">🕒</span><div><div class="wlabel">Last Sync</div><div class="wval" id="lastSyncText">—</div></div></div>
+  </div>
+
+  <div class="section-label">AI-Powered Features</div>
+  <div class="feature-grid">
+
+    <!-- CROP RECOMMENDATION CARD: navigates to crop_recommendation.html -->
+    <div class="fcard amber" id="cropRecoCard">
+      <div class="fcard-icon">🌱</div>
+      <div class="fcard-body">
+        <div class="fcard-title">Crop Recommendation</div>
+        <div class="fcard-desc">Get crop suggestions based on your soil type, climate, and water availability.</div>
+      </div>
+      <span class="fcard-tag">AI Powered</span>
+    </div>
+
+    <!-- YIELD PREDICTION CARD: navigates to yield_prediction.html -->
+    <div class="fcard green" id="yieldPredCard">
+      <div class="fcard-icon">📈</div>
+      <div class="fcard-body">
+        <div class="fcard-title">Yield Prediction</div>
+        <div class="fcard-desc">Forecast your harvest quantity per acre using weather patterns and crop stage data.</div>
+      </div>
+      <span class="fcard-tag">Predictive</span>
+    </div>
+
+    <!-- MSP & MARKET PRICES CARD: navigates to market_prices.html -->
+    <div class="fcard blue" id="marketCard">
+      <div class="fcard-icon">💰</div>
+      <div class="fcard-body">
+        <div class="fcard-title">MSP & Market Prices</div>
+        <div class="fcard-desc">Track Minimum Support Prices and compare with current APMC mandi rates.</div>
+      </div>
+      <span class="fcard-tag">Live Data</span>
+    </div>
+
+  </div>
+
+  <div class="bottom-grid">
+
+    <div class="panel">
+      <div class="panel-title">💹 MSP vs Market Price</div>
+      <table class="price-table">
+        <thead>
+          <tr>
+            <td style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:0.8px;padding-bottom:8px;">Crop</td>
+            <td style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:0.8px;padding-bottom:8px;">MSP</td>
+            <td style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:0.8px;padding-bottom:8px;">Mandi</td>
+            <td style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:0.8px;padding-bottom:8px;">Diff</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="crop-name">🌾 Wheat</td><td>₹2,275</td><td style="color:var(--text-dim);font-size:12px;">₹2,410</td><td><span class="price-badge up">+5.9%</span></td></tr>
+          <tr><td class="crop-name">🍚 Rice</td><td>₹2,183</td><td style="color:var(--text-dim);font-size:12px;">₹2,050</td><td><span class="price-badge dn">−6.1%</span></td></tr>
+          <tr><td class="crop-name">🫘 Soybean</td><td>₹4,600</td><td style="color:var(--text-dim);font-size:12px;">₹4,780</td><td><span class="price-badge up">+3.9%</span></td></tr>
+          <tr><td class="crop-name">🌽 Maize</td><td>₹2,090</td><td style="color:var(--text-dim);font-size:12px;">₹2,120</td><td><span class="price-badge up">+1.4%</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">📋 Today's Advisory (AI + IMD)</div>
+      <div class="advisory-list" id="advisoryList">
+        <div class="adv-item">
+          <span class="adv-dot amber"></span>
+          <div>
+            <div class="adv-title">Heavy rain alert — delay spraying</div>
+            <div class="adv-sub">IMD forecasts 38mm rain tonight. Reschedule pesticide spraying.</div>
+          </div>
+        </div>
+        <div class="adv-item">
+          <span class="adv-dot green"></span>
+          <div>
+            <div class="adv-title">Ideal window for wheat sowing</div>
+            <div class="adv-sub">Soil at 22°C — optimal for Rabi sowing. Recommended: HD-2967.</div>
+          </div>
+        </div>
+        <div class="adv-item">
+          <span class="adv-dot blue"></span>
+          <div>
+            <div class="adv-title">PM-Kisan instalment coming soon</div>
+            <div class="adv-sub">Next ₹2000 instalment expected in 14 days. Verify Aadhaar-bank linkage.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="last-updated" id="globalUpdateNote">✨ Live weather data from OpenWeatherMap via backend API • Click on any AI card to explore.</div>
+</div>
+
+<script>
+  // ------------------------------
+  // 1) NAVIGATION FOR FEATURE CARDS
+  // ------------------------------
+  const cropRecoCard = document.getElementById('cropRecoCard');
+  if (cropRecoCard) {
+    cropRecoCard.addEventListener('click', () => {
+      window.location.href = 'Crop_Recomendation.html';
+    });
+  }
+  
+  const yieldPredCard = document.getElementById('yieldPredCard');
+  if (yieldPredCard) {
+    yieldPredCard.addEventListener('click', () => {
+      window.location.href = 'Yield_predict.html';
+    });
+  }
+  
+  const marketCard = document.getElementById('marketCard');
+  if (marketCard) {
+    marketCard.addEventListener('click', () => {
+      window.location.href = 'market_prices.html';
+    });
+  }
+  
+  // ------------------------------
+  // 2) WEATHER FETCH & DYNAMIC UPDATE
+  // ------------------------------
+  const WEATHER_API_URL = (() => {
+    if (window.location.port === '5000' || window.location.hostname === 'localhost') {
+      return '/weather';
+    }
+    return 'http://localhost:5000/weather';
+  })();
+  
+  const tempElem = document.getElementById('tempValue');
+  const humidityElem = document.getElementById('humidityValue');
+  const rainfallElem = document.getElementById('rainfallValue');
+  const windElem = document.getElementById('windValue');
+  const cloudElem = document.getElementById('cloudValue');
+  const lastSyncSpan = document.getElementById('lastSyncText');
+  const refreshBtn = document.getElementById('refreshWeatherBtn');
+  const advisoryContainer = document.getElementById('advisoryList');
+  
+  function formatWindSpeed(mps) {
+    if (mps === undefined || mps === null) return '—';
+    const kmh = (mps * 3.6).toFixed(1);
+    return `${kmh} <span class="unit">km/h</span>`;
+  }
+  function formatTemp(celsius) {
+    if (celsius === undefined || celsius === null) return '—';
+    return `${Math.round(celsius)}<span class="unit">°C</span>`;
+  }
+  function formatHumidity(hum) {
+    if (hum === undefined || hum === null) return '—';
+    return `${Math.round(hum)}<span class="unit">%</span>`;
+  }
+  function formatRainfall(mm) {
+    if (mm === undefined || mm === null) return '0<span class="unit">mm</span>';
+    return `${mm.toFixed(1)}<span class="unit">mm</span>`;
+  }
+  function formatCloudCover(cloud) {
+    if (cloud === undefined || cloud === null) return '—';
+    return `${Math.round(cloud)}<span class="unit">%</span>`;
+  }
+  
+  function enhanceAdvisoryWithWeather(weatherData) {
+    if (!weatherData || !advisoryContainer) return;
+    const rain = weatherData.rainfall || 0;
+    const temp = weatherData.temperature;
+    const humidity = weatherData.humidity;
+    let rainAdvice = '';
+    if (rain > 5) {
+      rainAdvice = `⚠️ ${rain.toFixed(1)}mm rainfall last hour — avoid fertilizer top-dressing.`;
+    } else if (rain > 0) {
+      rainAdvice = `🌧️ Light rain (${rain.toFixed(1)}mm) — good for moisture but monitor drainage.`;
+    } else {
+      rainAdvice = `☀️ No rainfall recorded — irrigation advisory: check soil moisture.`;
+    }
+    const firstAdvice = advisoryContainer.querySelector('.adv-item:first-child');
+    if (firstAdvice) {
+      const advTitleSpan = firstAdvice.querySelector('.adv-title');
+      const advSubSpan = firstAdvice.querySelector('.adv-sub');
+      if (advTitleSpan) {
+        advTitleSpan.innerHTML = `🌧️ Rain update: ${rain > 0 ? 'Recent precipitation' : 'Dry conditions'}`;
+      }
+      if (advSubSpan) {
+        advSubSpan.innerHTML = `${rainAdvice} ${temp ? `Temp ${Math.round(temp)}°C · ` : ''}${humidity ? `Humidity ${Math.round(humidity)}%` : ''}`;
+      }
+    }
+    const secondAdvice = advisoryContainer.querySelector('.adv-item:nth-child(2)');
+    if (secondAdvice && temp) {
+      const subEl = secondAdvice.querySelector('.adv-sub');
+      if (subEl && temp > 32) {
+        subEl.innerHTML = `Heat stress alert (${Math.round(temp)}°C) — provide extra irrigation during noon hours. Consider mulching.`;
+      } else if (subEl && temp < 18) {
+        subEl.innerHTML = `Cooler conditions (${Math.round(temp)}°C) — favorable for leafy vegetables. Monitor night temperature.`;
+      } else if (subEl) {
+        subEl.innerHTML = `Soil at ${Math.round(temp)}°C — good for root development. Ideal for Rabi crop planning.`;
+      }
+    }
+  }
+  
+  async function fetchAndUpdateWeather() {
+    if (lastSyncSpan) lastSyncSpan.innerHTML = 'fetching...';
+    try {
+      const response = await fetch(WEATHER_API_URL, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const result = await response.json();
+      if (!result.success || !result.data) throw new Error(result.error || 'Invalid response');
+      const w = result.data;
+      const temperature = w.temperature;
+      const humidity = w.humidity;
+      const rainfall = w.rainfall !== undefined ? w.rainfall : 0;
+      const windSpeed = w.wind_speed;
+      const cloudCover = w.cloud_cover;
+      
+      if (tempElem) tempElem.innerHTML = formatTemp(temperature);
+      if (humidityElem) humidityElem.innerHTML = formatHumidity(humidity);
+      if (rainfallElem) rainfallElem.innerHTML = formatRainfall(rainfall);
+      if (windElem) windElem.innerHTML = formatWindSpeed(windSpeed);
+      if (cloudElem) cloudElem.innerHTML = formatCloudCover(cloudCover);
+      
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute:'2-digit', second:'2-digit' });
+      if (lastSyncSpan) lastSyncSpan.innerHTML = `${timeStr} (live)`;
+      
+      enhanceAdvisoryWithWeather({
+        temperature: temperature,
+        rainfall: rainfall,
+        humidity: humidity,
+        wind: windSpeed,
+        clouds: cloudCover
+      });
+      
+      const existingErr = document.getElementById('inlineWeatherError');
+      if (existingErr) existingErr.remove();
+      
+    } catch (error) {
+      console.error('Weather fetch error:', error);
+      if (tempElem) tempElem.innerHTML = '⚠️ offline';
+      if (humidityElem) humidityElem.innerHTML = '—';
+      if (rainfallElem) rainfallElem.innerHTML = 'err';
+      if (windElem) windElem.innerHTML = '—';
+      if (cloudElem) cloudElem.innerHTML = '—';
+      if (lastSyncSpan) lastSyncSpan.innerHTML = `failed: ${error.message.substring(0, 30)}`;
+      
+      let errorNote = document.getElementById('inlineWeatherError');
+      if (!errorNote && document.getElementById('weatherStrip')) {
+        const errDiv = document.createElement('div');
+        errDiv.id = 'inlineWeatherError';
+        errDiv.className = 'weather-error';
+        errDiv.style.marginTop = '8px';
+        errDiv.innerHTML = `⚠️ Could not fetch live weather. Make sure Flask backend is running on port 5000 and endpoint /weather is accessible. Using fallback values.`;
+        const weatherStripDiv = document.getElementById('weatherStrip');
+        if (weatherStripDiv && weatherStripDiv.parentNode) {
+          weatherStripDiv.parentNode.insertBefore(errDiv, weatherStripDiv.nextSibling);
+        }
+      }
+    }
+  }
+  
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      fetchAndUpdateWeather();
+    });
+  }
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    fetchAndUpdateWeather();
+    setInterval(() => {
+      fetchAndUpdateWeather();
+    }, 10 * 60 * 1000);
+  });
+  
+  // Keep soil moisture static hint
+  const soilElem = document.getElementById('soilMoistureStatic');
+  if (soilElem) soilElem.innerHTML = '64% <span class="unit">(simulated)</span>';
+</script>
+</body>
+</html>

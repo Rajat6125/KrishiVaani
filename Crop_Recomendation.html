@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>KrishiDrishti • Smart Crop Advisor</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+:root {
+  --green:       #10b981;
+  --green-light: #34d399;
+  --green-dark:  #059669;
+  --glass-bg:    rgba(2, 18, 8, 0.55);
+  --glass-border:rgba(16,185,129,0.28);
+  --text-1:      #ecfdf5;
+  --text-2:      #a7f3d0;
+  --text-3:      #6ee7b7;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+  background: url('Pic/j.jpg') center/cover fixed no-repeat;
+  color: var(--text-1);
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.52);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body > * { position: relative; z-index: 1; }
+
+/* ─── FLOATING BUTTONS (like first example) ────────────────── */
+.back-btn, .signout-btn {
+  position: fixed;
+  top: 22px;
+  z-index: 100;
+  padding: 9px 16px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  font-family: 'DM Sans', 'Outfit', sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+}
+
+.back-btn {
+  left: 22px;
+}
+.signout-btn {
+  right: 22px;
+  border-color: rgba(239,68,68,0.25);
+  background: rgba(239,68,68,0.08);
+  color: #fca5a5;
+}
+
+.back-btn:hover {
+  border-color: rgba(255,255,255,0.3);
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+}
+.signout-btn:hover {
+  border-color: rgba(239,68,68,0.5);
+  background: rgba(239,68,68,0.18);
+  color: #fff;
+}
+
+/* ─── MAIN LAYOUT ─────────────────────────────────────── */
+.page {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 28px;
+  gap: 26px;
+}
+
+/* ─── PANELS (glass) ──────────────────────────────────── */
+.panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(22px) saturate(1.3);
+  -webkit-backdrop-filter: blur(22px) saturate(1.3);
+  border-radius: 24px;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 24px 56px -16px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04);
+  overflow: hidden;
+}
+
+/* ─── LEFT: INPUT PANEL ───────────────────────────────── */
+.input-panel {
+  width: 400px;
+  flex-shrink: 0;
+  padding: 28px 30px 26px;
+}
+
+.panel-eyebrow {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--green-light);
+  margin-bottom: 5px;
+  text-align: center;
+}
+.panel-eyebrow i { font-size: 0.68rem; }
+
+.panel-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: var(--text-1);
+  line-height: 1.2;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.inputs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 14px;
+  margin-bottom: 14px;
+}
+.inputs-grid .full { grid-column: 1 / -1; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.field label {
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.range-hint {
+  font-size: 0.6rem;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text-2);
+  opacity: 0.8;
+  background: rgba(0,0,0,0.3);
+  padding: 0 6px;
+  border-radius: 20px;
+}
+.field input {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(16,185,129,0.3);
+  border-radius: 10px;
+  padding: 9px 13px;
+  color: var(--text-1);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+  width: 100%;
+}
+.field input::placeholder { color: rgba(167,243,208,0.3); }
+.field input:focus {
+  border-color: var(--green);
+  background: rgba(0,0,0,0.5);
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.12);
+}
+.field input:valid:not(:placeholder-shown) {
+  border-color: rgba(52,211,153,0.5);
+}
+/* highlight invalid values */
+.field input:invalid:not(:placeholder-shown) {
+  border-color: #f87171;
+  background: rgba(248,113,113,0.1);
+}
+
+.error-msg {
+  font-size: 0.75rem;
+  color: #f87171;
+  min-height: 36px;
+  margin-bottom: 4px;
+  background: rgba(127,29,29,0.2);
+  border-radius: 10px;
+  padding: 6px 10px;
+  backdrop-filter: blur(2px);
+}
+
+/* ─── PREDICT BUTTON ──────────────────────────────────── */
+.predict-btn {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #012010;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  transition: all 0.25s ease;
+  box-shadow: 0 5px 20px rgba(16,185,129,0.36);
+  position: relative;
+  overflow: hidden;
+}
+.predict-btn::before {
+  content: '';
+  position: absolute; top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  transition: left 0.4s ease;
+}
+.predict-btn:hover::before { left: 100%; }
+.predict-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 11px 28px rgba(16,185,129,0.5);
+  background: linear-gradient(135deg, #34d399, #10b981);
+}
+.predict-btn:active { transform: translateY(0); }
+.predict-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─── LOADING SPINNER inside button ───────────────────── */
+.btn-spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid rgba(1,32,16,0.4);
+  border-top-color: #012010;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── API STATUS BADGE ────────────────────────────────── */
+.api-status {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.65rem; font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  padding: 5px 10px;
+  border-radius: 100px;
+  width: fit-content;
+  margin-left: auto; margin-right: auto;
+  transition: all 0.3s ease;
+}
+.api-status.checking {
+  background: rgba(251,191,36,0.1);
+  border: 1px solid rgba(251,191,36,0.3);
+  color: #fbbf24;
+}
+.api-status.online {
+  background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.3);
+  color: var(--green-light);
+}
+.api-status.offline {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #fca5a5;
+}
+.api-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.api-status.online .api-dot { animation: blink 2s ease infinite; }
+@keyframes blink {
+  0%,100% { opacity:1; }
+  50%      { opacity:0.3; }
+}
+
+/* ─── CONFIDENCE BAR ──────────────────────────────────── */
+.confidence-bar-wrap {
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+.confidence-label {
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 5px;
+  display: flex; justify-content: space-between;
+}
+.confidence-track {
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.confidence-fill {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(90deg, var(--green-dark), var(--green-light));
+  width: 0%;
+  transition: width 0.9s cubic-bezier(0.22,1,0.36,1);
+}
+
+/* ─── RIGHT: RESULT PANEL ─────────────────────────────── */
+.result-panel {
+  flex: 1;
+  min-width: 320px;
+  max-width: 480px;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.result-bg {
+  position: absolute; inset: 0;
+  background-image: url('Pic/x2.jpg');
+  background-size: cover;
+  background-position: center;
+  transition: opacity 0.6s ease;
+  z-index: 0;
+}
+.result-bg-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(2,14,6,0.82) 100%);
+  z-index: 1;
+}
+
+.waiting-state {
+  position: absolute; inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: opacity 0.5s ease;
+}
+.waiting-state .pulse-ring {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  border: 2px solid rgba(16,185,129,0.5);
+  display: flex; align-items: center; justify-content: center;
+  animation: pulse 2.4s ease infinite;
+  color: var(--green-light);
+  font-size: 1.5rem;
+}
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.35); }
+  50%      { box-shadow: 0 0 0 14px rgba(16,185,129,0); }
+}
+.waiting-state p {
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-weight: 500;
+}
+
+/* Loading overlay on result panel */
+.result-loading {
+  position: absolute; inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(1,14,6,0.75);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.result-loading.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.result-loading .big-spinner {
+  width: 48px; height: 48px;
+  border: 3px solid rgba(16,185,129,0.2);
+  border-top-color: var(--green-light);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.result-loading p {
+  font-size: 0.8rem;
+  color: var(--text-3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.result-content {
+  position: absolute; inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 28px;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s;
+  pointer-events: none;
+}
+.result-content.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.result-crop-img {
+  position: absolute; inset: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+  transition: opacity 0.5s ease;
+}
+.result-gradient {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(1,14,6,0.9) 60%);
+  z-index: 1;
+}
+.result-inner { position: relative; z-index: 2; }
+
+.result-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(16,185,129,0.2);
+  border: 1px solid rgba(16,185,129,0.45);
+  border-radius: 100px;
+  padding: 4px 13px;
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green-light);
+  margin-bottom: 8px;
+}
+
+.result-crop-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.7rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+  margin-bottom: 7px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.result-info {
+  font-size: 0.85rem;
+  color: #a7f3d0;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.result-tags {
+  display: flex; flex-wrap: wrap; gap: 7px;
+}
+.result-tag {
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(16,185,129,0.3);
+  border-radius: 100px;
+  padding: 4px 13px;
+  font-size: 0.73rem;
+  color: #6ee7b7;
+  display: flex; align-items: center; gap: 5px;
+}
+
+/* ─── RESPONSIVE ──────────────────────────────────────── */
+@media (max-width: 820px) {
+  .page { flex-direction: column; align-items: center; padding: 20px 16px; }
+  .input-panel { width: 100%; max-width: 420px; }
+  .result-panel { width: 100%; max-width: 420px; min-height: 320px; }
+  .back-btn, .signout-btn { top: 16px; padding: 6px 12px; font-size: 12px; }
+  .back-btn { left: 16px; }
+  .signout-btn { right: 16px; }
+}
+@media (max-width: 500px) {
+  .inputs-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- FLOATING BUTTONS (no header) -->
+<button class="back-btn" onclick="window.location.href='Main.html'">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  Back
+</button>
+
+<button class="signout-btn" onclick="confirmSignout()">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+  Sign Out
+</button>
+
+<!-- MAIN CONTENT (header removed) -->
+<div class="page">
+
+  <!-- LEFT: INPUT PANEL -->
+  <div class="panel input-panel">
+    <div class="panel-eyebrow"><i class="fas fa-flask"></i> Soil & Climate Analysis</div>
+    <div class="panel-title">Find Your<br><em>Ideal Crop</em></div>
+
+    <!-- API Status indicator -->
+    <div class="api-status checking" id="apiStatus">
+      <div class="api-dot"></div>
+      <span id="apiStatusText">Checking API…</span>
+    </div>
+
+    <div class="inputs-grid">
+      <div class="field">
+        <label>Nitrogen (N) <span class="range-hint">0–140</span></label>
+        <input type="number" id="N" placeholder="0–140" min="0" max="140" step="1" value="">
+      </div>
+      <div class="field">
+        <label>Phosphorus (P) <span class="range-hint">5–145</span></label>
+        <input type="number" id="P" placeholder="5–145" min="5" max="145" step="1" value="">
+      </div>
+      <div class="field">
+        <label>Potassium (K) <span class="range-hint">5–205</span></label>
+        <input type="number" id="K" placeholder="5–205" min="5" max="205" step="1" value="">
+      </div>
+      <div class="field">
+        <label>Temperature °C <span class="range-hint">0–50</span></label>
+        <input type="number" id="temp" placeholder="0–50" min="0" max="50" step="0.1" value="">
+      </div>
+      <div class="field">
+        <label>Humidity % <span class="range-hint">0–100</span></label>
+        <input type="number" id="humidity" placeholder="0–100" min="0" max="100" step="1" value="">
+      </div>
+      <div class="field">
+        <label>Soil pH <span class="range-hint">3–10</span></label>
+        <input type="number" id="ph" placeholder="3–10" step="0.1" min="3" max="10" value="">
+      </div>
+      <div class="field full">
+        <label>Rainfall (mm) <span class="range-hint">0–500</span></label>
+        <input type="number" id="rainfall" placeholder="0–500" min="0" max="500" step="1" value="">
+      </div>
+    </div>
+
+    <p class="error-msg" id="error"></p>
+
+    <button class="predict-btn" id="predictBtn" onclick="predictCrop()">
+      <i class="fas fa-seedling"></i>
+      Analyze & Recommend
+    </button>
+  </div>
+
+  <!-- RIGHT: RESULT PANEL -->
+  <div class="panel result-panel" id="resultPanel">
+
+    <!-- Default decorative BG -->
+    <div class="result-bg" id="resultBg"></div>
+    <div class="result-bg-overlay"></div>
+
+    <!-- Waiting state -->
+    <div class="waiting-state" id="waitingState">
+      <div class="pulse-ring"><i class="fas fa-leaf"></i></div>
+      <p>Awaiting Analysis</p>
+    </div>
+
+    <!-- Loading overlay (shown during API call) -->
+    <div class="result-loading" id="resultLoading">
+      <div class="big-spinner"></div>
+      <p>Consulting the model…</p>
+    </div>
+
+    <!-- Result content (hidden until prediction) -->
+    <div class="result-content" id="resultContent">
+      <div class="result-crop-img" id="resultCropImg"></div>
+      <div class="result-gradient"></div>
+      <div class="result-inner">
+        <div class="result-badge"><i class="fas fa-check-circle"></i> Recommended Crop</div>
+        <div class="result-crop-name" id="cropName"></div>
+        <div class="result-info" id="cropInfo"></div>
+        <!-- Confidence bar -->
+        <div class="confidence-bar-wrap" id="confidenceWrap" style="display:none;">
+          <div class="confidence-label">
+            <span>Model Confidence</span>
+            <span id="confidenceValue">—</span>
+          </div>
+          <div class="confidence-track">
+            <div class="confidence-fill" id="confidenceFill"></div>
+          </div>
+        </div>
+        <div class="result-tags" id="cropTags"></div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+/* ─────────────────────────────────────────────────────────
+   CONFIG — change this if your Flask server runs elsewhere
+   ───────────────────────────────────────────────────────── */
+const API_BASE = "http://localhost:5000";
+
+/* ─────────────────────────────────────────────────────────
+   CROP DATA MAP (unchanged)
+   ───────────────────────────────────────────────────────── */
+const cropData = {
+  rice: { img: "Pic/Rice.jpg", info: "Thrives in high humidity and abundant rainfall. Ideal for waterlogged plains and delta regions.", tags: [{ icon:"fa-tint", label:"High Water" }, { icon:"fa-thermometer-half", label:">25°C" }, { icon:"fa-cloud-rain", label:">200mm" }] },
+  maize: { img: "Pic/Maize.jpg", info: "Highly adaptable with moderate water needs. Grows well across varied soil types and temperatures.", tags: [{ icon:"fa-sun", label:"20–30°C" }, { icon:"fa-layer-group", label:"Loamy Soil" }, { icon:"fa-check", label:"Adaptable" }] },
+  chickpea: { img: "Pic/Chickpeas 2.jpg", info: "Best suited to cool, dry climates. Drought-tolerant and excellent for nitrogen-fixing soil improvement.", tags: [{ icon:"fa-snowflake", label:"Cool Climate" }, { icon:"fa-leaf", label:"Drought Hardy" }, { icon:"fa-flask", label:"N-Fixing" }] },
+  kidneybeans: { img: "Pic/Kidney Bean.jpg", info: "Prefers warm climates with moderate rainfall. Needs well-drained soils for healthy growth.", tags: [{ icon:"fa-sun", label:"Warm Climate" }, { icon:"fa-tint", label:"Moderate Water" }, { icon:"fa-seedling", label:"Well-drained Soil" }] },
+  pigeonpeas: { img: "Pic/K.jpg", info: "Drought-resistant legume grown in semi-arid regions. Improves soil fertility.", tags: [{ icon:"fa-leaf", label:"Drought Resistant" }, { icon:"fa-sun", label:"Tropical" }, { icon:"fa-flask", label:"N-Fixing" }] },
+  mothbeans: { img: "Pic/Month bean.jpg", info: "Thrives in arid climates with very low water requirements. Ideal for desert regions.", tags: [{ icon:"fa-sun", label:"Hot Climate" }, { icon:"fa-tint", label:"Low Water" }, { icon:"fa-wind", label:"Arid Region" }] },
+  mungbean: { img: "Pic/F.jpg", info: "Short-duration crop grown in warm climates. Enhances soil nitrogen content.", tags: [{ icon:"fa-clock", label:"Short Duration" }, { icon:"fa-sun", label:"Warm" }, { icon:"fa-flask", label:"N-Fixing" }] },
+  blackgram: { img: "Pic/blackgram.jpg", info: "Grows well in warm, humid climates. Important pulse crop in India.", tags: [{ icon:"fa-cloud-rain", label:"Humid" }, { icon:"fa-sun", label:"Warm" }, { icon:"fa-seedling", label:"Pulse Crop" }] },
+  lentil: { img: "Pic/lentil.jpg", info: "Cool-season legume grown in dry regions. Requires minimal irrigation.", tags: [{ icon:"fa-snowflake", label:"Cool Season" }, { icon:"fa-tint", label:"Low Water" }, { icon:"fa-leaf", label:"Legume" }] },
+  pomegranate: { img: "Pic/pomegranate.jpg", info: "Thrives in dry climates with hot summers. Produces high-value fruits.", tags: [{ icon:"fa-sun", label:"Hot Climate" }, { icon:"fa-star", label:"High Value" }, { icon:"fa-tint", label:"Low Water" }] },
+  banana: { img: "Pic/Banana.jpg", info: "Requires warm temperatures, high humidity, and consistent water supply.", tags: [{ icon:"fa-tint", label:"High Water" }, { icon:"fa-cloud", label:"Humid" }, { icon:"fa-thermometer-half", label:"25–35°C" }] },
+  grapes: { img: "Pic/grapes.jpg", info: "Prefers warm, dry climates with well-drained soils. Sensitive to excess moisture.", tags: [{ icon:"fa-sun", label:"Warm" }, { icon:"fa-wind", label:"Dry Climate" }, { icon:"fa-seedling", label:"Well-drained Soil" }] },
+  watermelon: { img: "Pic/H.jpg", info: "Grows best in hot climates with sandy soils and good sunlight.", tags: [{ icon:"fa-sun", label:"Hot Climate" }, { icon:"fa-layer-group", label:"Sandy Soil" }, { icon:"fa-lightbulb", label:"Full Sun" }] },
+  muskmelon: { img: "Pic/mellon.jpg", info: "Requires warm temperatures and well-drained sandy soils.", tags: [{ icon:"fa-sun", label:"Warm" }, { icon:"fa-layer-group", label:"Sandy Soil" }, { icon:"fa-tint", label:"Moderate Water" }] },
+  apple: { img: "Pic/Apple.jpg", info: "Grows in temperate climates with cold winters and mild summers.", tags: [{ icon:"fa-snowflake", label:"Cold Winter" }, { icon:"fa-tree", label:"Orchard" }, { icon:"fa-globe", label:"Temperate" }] },
+  orange: { img: "Pic/Orange.jpg", info: "Prefers subtropical climates with moderate rainfall and sunshine.", tags: [{ icon:"fa-sun", label:"Subtropical" }, { icon:"fa-tint", label:"Moderate Water" }, { icon:"fa-tree", label:"Fruit Crop" }] },
+  papaya: { img: "Pic/Papaya.jpg", info: "Fast-growing tropical fruit crop needing warm temperatures and irrigation.", tags: [{ icon:"fa-bolt", label:"Fast Growth" }, { icon:"fa-sun", label:"Tropical" }, { icon:"fa-tint", label:"Irrigation" }] },
+  coconut: { img: "Pic/coconut.jpg", info: "Thrives in coastal tropical climates with sandy soils and high humidity.", tags: [{ icon:"fa-water", label:"Coastal" }, { icon:"fa-cloud", label:"Humid" }, { icon:"fa-tree", label:"Perennial" }] },
+  jute: { img: "Pic/jute.jpg", info: "Requires warm and humid climate with heavy rainfall. Used for fiber production.", tags: [{ icon:"fa-cloud-rain", label:"High Rainfall" }, { icon:"fa-industry", label:"Fiber Crop" }, { icon:"fa-sun", label:"Warm" }] },
+  coffee: { img: "Pic/Coffee.jpg", info: "Grows in tropical highlands with moderate rainfall and shade.", tags: [{ icon:"fa-mountain", label:"Highland" }, { icon:"fa-cloud-rain", label:"Moderate Rain" }, { icon:"fa-leaf", label:"Shade Crop" }] },
+  cotton: { img: "Pic/Cotton.jpg", info: "Requires warm, long growing seasons and moderate rainfall.", tags: [{ icon:"fa-thermometer-full", label:">30°C" }, { icon:"fa-money-bill", label:"Cash Crop" }, { icon:"fa-wind", label:"Dry Season" }] },
+  mango: { img: "Pic/mango.jpg", info: "Loves warm tropical climates with a distinct dry season.", tags: [{ icon:"fa-sun", label:"Tropical" }, { icon:"fa-tree", label:"Perennial" }, { icon:"fa-star", label:"High Value" }] },
+  wheat: { img: "Pic/A.jpg", info: "Suited to cool winters and mild springs.", tags: [{ icon:"fa-wind", label:"Cool Winter" }, { icon:"fa-seedling", label:"Rabi Crop" }, { icon:"fa-globe", label:"Staple Food" }] }
+};
+
+/* ─── API HEALTH CHECK (unchanged) ────────────────────── */
+async function checkApiHealth() {
+  const statusEl   = document.getElementById("apiStatus");
+  const statusText = document.getElementById("apiStatusText");
+  try {
+    const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(4000) });
+    const data = await res.json();
+    if (data.status === "healthy" && data.model_loaded) {
+      statusEl.className   = "api-status online";
+      statusText.innerText = "Model Ready";
+    } else {
+      statusEl.className   = "api-status offline";
+      statusText.innerText = "Model Not Loaded";
+    }
+  } catch {
+    statusEl.className   = "api-status offline";
+    statusText.innerText = "API Offline";
+  }
+}
+checkApiHealth();
+
+/* ─────────────────────────────────────────────────────────
+   STRICT RANGE VALIDATION — rejects any value outside defined min/max
+   ───────────────────────────────────────────────────────── */
+function validateInputs() {
+  const fields = [
+    { id: "N", name: "Nitrogen", min: 0, max: 140 },
+    { id: "P", name: "Phosphorus", min: 5, max: 145 },
+    { id: "K", name: "Potassium", min: 5, max: 205 },
+    { id: "temp", name: "Temperature", min: 0, max: 50 },
+    { id: "humidity", name: "Humidity", min: 0, max: 100 },
+    { id: "ph", name: "pH", min: 3, max: 10 },
+    { id: "rainfall", name: "Rainfall", min: 0, max: 500 }
+  ];
+
+  for (let field of fields) {
+    const inputEl = document.getElementById(field.id);
+    const rawValue = inputEl.value.trim();
+    if (rawValue === "") {
+      return `${field.name} is required.`;
+    }
+    const num = parseFloat(rawValue);
+    if (isNaN(num)) {
+      return `${field.name} must be a valid number.`;
+    }
+    if (num < field.min || num > field.max) {
+      return `${field.name} must be between ${field.min} and ${field.max}. (Entered: ${num})`;
+    }
+  }
+  return null; // all valid
+}
+
+function confirmSignout() {
+  if (confirm("Are you sure you want to sign out?")) {
+    window.location.href = "login.html";
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   MAIN PREDICT — strict validation before API call
+   ───────────────────────────────────────────────────────── */
+async function predictCrop() {
+  const errMsg = validateInputs();
+  const errEl  = document.getElementById("error");
+  const btn    = document.getElementById("predictBtn");
+
+  if (errMsg) {
+    errEl.innerText = `⚠️ ${errMsg}`;
+    return;
+  }
+  errEl.innerText = "";
+
+  // Additional browser-level constraint: also ensure html5 validity (double-check)
+  const allInputs = ["N","P","K","temp","humidity","ph","rainfall"];
+  let htmlValid = true;
+  for (let id of allInputs) {
+    const inp = document.getElementById(id);
+    if (!inp.checkValidity()) {
+      inp.reportValidity();
+      htmlValid = false;
+      break;
+    }
+  }
+  if (!htmlValid) return;
+
+  // Build payload
+  const payload = {
+    N:           parseFloat(document.getElementById("N").value),
+    P:           parseFloat(document.getElementById("P").value),
+    K:           parseFloat(document.getElementById("K").value),
+    temperature: parseFloat(document.getElementById("temp").value),
+    humidity:    parseFloat(document.getElementById("humidity").value),
+    ph:          parseFloat(document.getElementById("ph").value),
+    rainfall:    parseFloat(document.getElementById("rainfall").value)
+  };
+
+  // UI: loading state
+  btn.disabled = true;
+  btn.innerHTML = `<span class="btn-spinner"></span> Analyzing…`;
+  document.getElementById("resultLoading").classList.add("active");
+
+  try {
+    const response = await fetch(`${API_BASE}/predict`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(10000)
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || "Prediction failed");
+    }
+
+    const cropKey = result.crop.toLowerCase().replace(/\s+/g, "");
+    showResult(cropKey, result.crop, result.confidence);
+
+  } catch (e) {
+    errEl.innerText = `⚠️ ${e.message || "Could not reach the API. Is Flask running?"}`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="fas fa-seedling"></i> Analyze & Recommend`;
+    document.getElementById("resultLoading").classList.remove("active");
+  }
+}
+
+/* ─── SHOW RESULT (unchanged logic) ───────────────────── */
+function showResult(cropKey, displayName, confidence) {
+  const data = cropData[cropKey] || {
+    img: "",
+    info: "This crop was recommended based on your soil and climate parameters.",
+    tags: []
+  };
+
+  document.getElementById("waitingState").style.opacity      = "0";
+  document.getElementById("waitingState").style.pointerEvents = "none";
+
+  const imgEl = document.getElementById("resultCropImg");
+  imgEl.style.opacity = "0";
+  setTimeout(() => {
+    if (data.img) {
+      imgEl.style.backgroundImage = `url('${data.img}')`;
+    }
+    imgEl.style.transition = "opacity 0.6s ease";
+    imgEl.style.opacity    = "1";
+  }, 100);
+
+  const pretty = displayName.split(/[\s_]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+  document.getElementById("cropName").innerText = pretty;
+  document.getElementById("cropInfo").innerText = data.info;
+
+  if (confidence !== undefined && confidence !== null) {
+    const pct = Math.round(confidence * 100);
+    document.getElementById("confidenceWrap").style.display = "block";
+    document.getElementById("confidenceValue").innerText    = `${pct}%`;
+    setTimeout(() => {
+      document.getElementById("confidenceFill").style.width = `${pct}%`;
+    }, 300);
+  }
+
+  const tagsEl = document.getElementById("cropTags");
+  tagsEl.innerHTML = data.tags.map(t => `<div class="result-tag"><i class="fas ${t.icon}"></i>${t.label}</div>`).join("");
+  document.getElementById("resultContent").classList.add("visible");
+}
+</script>
+
+</body>
+</html>

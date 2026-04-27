@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register • KrishiDrishti</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --amber: #f5a623;
+    --card-bg: rgba(13, 17, 23, 0.88);
+    --input-bg: rgba(255,255,255,0.06);
+    --input-border: rgba(255,255,255,0.12);
+    --accent: #6ee7b7;
+    --text-dim: rgba(255,255,255,0.45);
+    --radius: 20px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    min-height: 100vh;
+    font-family: 'DM Sans', sans-serif;
+    background: #0a0f0a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 30px 16px;
+  }
+
+  .bg-layer {
+    position: fixed; inset: 0; z-index: 0;
+    background: url('pic/h.jpg') center/cover no-repeat;
+  }
+  .bg-layer::after {
+    content: ''; position: absolute; inset: 0;
+    background: rgba(0,0,0,0.35);
+  }
+
+  .grain {
+    position: fixed; inset: 0; z-index: 1; opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 200px 200px; pointer-events: none;
+  }
+
+  .orb {
+    position: fixed; border-radius: 50%; filter: blur(80px);
+    opacity: 0.25; pointer-events: none; z-index: 0;
+    animation: drift 14s ease-in-out infinite alternate;
+  }
+  .orb-1 { width:500px; height:500px; background:radial-gradient(circle,#f59e0b,transparent 70%); top:-100px; left:-100px; animation-duration:16s; }
+  .orb-2 { width:400px; height:400px; background:radial-gradient(circle,#10b981,transparent 70%); bottom:-80px; right:-80px; animation-duration:12s; animation-delay:-5s; }
+  .orb-3 { width:300px; height:300px; background:radial-gradient(circle,#6366f1,transparent 70%); top:40%; left:55%; animation-duration:18s; animation-delay:-8s; }
+
+  @keyframes drift {
+    from { transform: translate(0,0) scale(1); }
+    to   { transform: translate(30px,20px) scale(1.06); }
+  }
+
+  /* CARD */
+  .container {
+    position: relative; z-index: 10;
+    display: grid; grid-template-columns: 0.75fr 1.25fr;
+    width: 880px; border-radius: var(--radius); overflow: hidden;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
+    animation: cardIn 0.8s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  @keyframes cardIn {
+    from { opacity:0; transform:translateY(28px) scale(0.97); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  /* LEFT */
+  .left {
+    position: relative;
+    background: url('Pic/login.jpg') center/cover no-repeat;
+    overflow: hidden; min-height: 500px;
+  }
+  .left-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(160deg, rgba(10,8,4,0.35) 0%, rgba(20,30,14,0.55) 50%, rgba(5,8,3,0.82) 100%);
+  }
+  .left-content {
+    position: relative; z-index: 2; height: 100%;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 36px 36px 38px; color: #fff;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-icon {
+    width:38px; height:38px;
+    background: linear-gradient(135deg, var(--amber), #e67e22);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-size: 18px; box-shadow: 0 4px 14px rgba(245,166,35,0.4); flex-shrink: 0;
+  }
+  .brand h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px; font-weight: 700; letter-spacing: -0.3px; color: #fff;
+  }
+  .tagline {
+    font-size: 22px; font-family: 'Playfair Display', serif;
+    font-weight: 600; line-height: 1.35; margin-bottom: 14px; color: #fff;
+  }
+  .tagline span { color: var(--amber); }
+  .left-desc { font-size: 13.5px; line-height: 1.7; color: rgba(255,255,255,0.6); max-width: 260px; }
+  .stats-row { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+  .stat-pill {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.07); backdrop-filter: blur(6px);
+    font-size: 12px; color: rgba(255,255,255,0.75); font-weight: 500;
+  }
+  .stat-dot {
+    width:6px; height:6px; border-radius:50%;
+    background: var(--accent); box-shadow: 0 0 6px var(--accent);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%     { opacity:0.5; transform:scale(0.7); }
+  }
+
+  /* RIGHT */
+  .right {
+    background: var(--card-bg); padding: 30px 42px 28px;
+    display: flex; flex-direction: column; justify-content: center;
+    backdrop-filter: blur(24px);
+    border-left: 1px solid rgba(255,255,255,0.06);
+  }
+  .right-header { margin-bottom: 14px; }
+  .right-header .eyebrow {
+    font-size: 11px; font-weight: 500; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--amber); margin-bottom: 6px;
+  }
+  .right-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px; font-weight: 700; color: #fff; letter-spacing: -0.5px;
+  }
+  .right-header p { margin-top: 5px; font-size: 13.5px; color: var(--text-dim); }
+
+  .section-label {
+    font-size: 10.5px; font-weight: 600; letter-spacing: 1.8px;
+    text-transform: uppercase; color: rgba(255,255,255,0.25);
+    margin: 2px 0 8px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.08); }
+
+  .input-group { margin-bottom: 9px; }
+  .input-group label {
+    display: block; font-size: 12px; font-weight: 500;
+    color: rgba(255,255,255,0.5); margin-bottom: 7px; letter-spacing: 0.5px;
+  }
+  .input-wrap { position: relative; }
+  .input-icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: rgba(255,255,255,0.3); pointer-events: none; transition: color 0.2s;
+  }
+  .input {
+    width: 100%; padding: 10px 14px 10px 40px;
+    background: var(--input-bg); border: 1px solid var(--input-border);
+    border-radius: 11px; color: #fff; font-size: 13.5px;
+    font-family: 'DM Sans', sans-serif;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  .input::placeholder { color: rgba(255,255,255,0.22); }
+  .input:focus {
+    border-color: var(--amber); background: rgba(245,166,35,0.06);
+    box-shadow: 0 0 0 3px rgba(245,166,35,0.12);
+  }
+  .input-group:focus-within .input-icon { color: var(--amber); }
+
+  .terms-row { display: flex; align-items: flex-start; gap: 10px; margin: 2px 0 10px; }
+  .terms-row input[type="checkbox"] {
+    width:16px; height:16px; accent-color: var(--amber);
+    margin-top: 2px; cursor: pointer; flex-shrink: 0;
+  }
+  .terms-row label { font-size: 12.5px; color: var(--text-dim); line-height: 1.55; cursor: pointer; }
+  .terms-row a { color: var(--amber); text-decoration: none; }
+
+  .error-msg { font-size: 12.5px; color: #f87171; margin-bottom: 10px; display: none; padding-left: 2px; }
+  .error-msg.show { display: block; }
+
+  .btn {
+    width: 100%; padding: 12px; border: none; border-radius: 11px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #1a0d00; font-weight: 700; font-size: 15px;
+    font-family: 'DM Sans', sans-serif; cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.22,1,0.36,1);
+    box-shadow: 0 4px 20px rgba(245,158,11,0.35);
+    position: relative; overflow: hidden;
+  }
+  .btn::before {
+    content:''; position:absolute; inset:0;
+    background: linear-gradient(135deg,rgba(255,255,255,0.15),transparent);
+    opacity:0; transition: opacity 0.2s;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,158,11,0.5); }
+  .btn:hover::before { opacity: 1; }
+  .btn:active { transform: translateY(0); }
+  .btn.success { background: linear-gradient(135deg,#10b981,#059669); box-shadow: 0 4px 20px rgba(16,185,129,0.35); }
+
+  .divider { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
+  .divider-line { flex:1; height:1px; background:rgba(255,255,255,0.08); }
+  .divider span { font-size: 12px; color: var(--text-dim); }
+
+  .footer-links { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 4px; }
+  .footer-links span { font-size: 13px; color: var(--text-dim); }
+  .footer-links a { font-size: 13px; color: var(--amber); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+  .footer-links a:hover { color: #fbbf24; }
+
+  .back {
+    position: fixed; top: 22px; left: 22px; z-index: 50;
+    padding: 9px 16px; border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px; background: rgba(0,0,0,0.5); color: rgba(255,255,255,0.75);
+    cursor: pointer; font-size: 13.5px; font-family: 'DM Sans', sans-serif;
+    font-weight: 500; display: flex; align-items: center; gap: 6px;
+    backdrop-filter: blur(10px); transition: all 0.2s; animation: cardIn 0.6s 0.1s both;
+  }
+  .back:hover { border-color: rgba(255,255,255,0.3); background: rgba(0,0,0,0.7); color: #fff; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+  .shake { animation: shake 0.4s ease; }
+
+  @media(max-width: 768px) {
+    .container { grid-template-columns: 1fr; width: 96%; }
+    .left { display: none; }
+    .right { padding: 36px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="bg-layer"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<button class="back" onclick="window.location.href='login.html'">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  Back
+</button>
+
+<div class="container">
+
+  <!-- LEFT -->
+  <div class="left">
+    <div class="left-overlay"></div>
+    <div class="left-content">
+      <div class="brand">
+        <h2>KrishiDrishti</h2>
+      </div>
+      <div class="left-bottom">
+        <p class="tagline">Your fields,<br><span>smarter than ever</span></p>
+        <p class="left-desc">Join thousands of farmers using AI to grow better, plan smarter, and harvest more.</p>
+        <div class="stats-row">
+          <div class="stat-pill"><span class="stat-dot"></span> Free to join</div>
+          <div class="stat-pill"><span class="stat-dot"></span> AI-Powered</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="right-header">
+      <div class="eyebrow">Get started free</div>
+      <h2>Create account</h2>
+      <p>Fill in your details to set up your farmer profile</p>
+    </div>
+
+    <div class="section-label">Personal info</div>
+
+    <div class="input-group">
+      <label>Full Name</label>
+      <div class="input-wrap">
+        <input class="input" id="firstName" type="text" placeholder="Arjun Singh" autocomplete="name">
+        <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Email Address</label>
+      <div class="input-wrap">
+        <input class="input" id="email" type="email" placeholder="arjun@example.com" autocomplete="email">
+        <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Phone Number</label>
+      <div class="input-wrap">
+        <input class="input" id="phone" type="tel" placeholder="+91 98765 43210" autocomplete="tel">
+        <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.14 13.5 19.79 19.79 0 0 1 1.07 4.9 2 2 0 0 1 3.05 2.73h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21 16.92z"/></svg>
+      </div>
+    </div>
+
+    <div class="section-label">Security</div>
+
+    <div class="input-group">
+      <label>Password</label>
+      <div class="input-wrap">
+        <input class="input" id="password" type="password" placeholder="Min. 6 characters">
+        <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+    </div>
+
+    <div class="terms-row">
+      <input type="checkbox" id="terms">
+      <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a> of KrishiDrishti</label>
+    </div>
+
+    <div class="error-msg" id="error-msg"></div>
+
+    <button class="btn" id="registerBtn" onclick="validateRegister()">Create My Account</button>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <span>already a member?</span>
+      <div class="divider-line"></div>
+    </div>
+
+    <div class="footer-links">
+      <span>Have an account?</span>
+      <a href="login.html">Sign in instead →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function validateRegister() {
+    const firstName    = document.getElementById('firstName').value.trim();
+    const email        = document.getElementById('email').value.trim();
+    const phone        = document.getElementById('phone').value.trim();
+    const password     = document.getElementById('password').value;
+    const termsChecked = document.getElementById('terms').checked;
+    const btn          = document.getElementById('registerBtn');
+    const errMsg       = document.getElementById('error-msg');
+    const container    = document.querySelector('.container');
+
+    const showError = (msg) => {
+      errMsg.textContent = msg;
+      errMsg.classList.add('show');
+      container.classList.add('shake');
+      setTimeout(() => container.classList.remove('shake'), 400);
+    };
+
+    errMsg.classList.remove('show');
+
+    if (!firstName)                             return showError('Please enter your full name.');
+    if (!email || !/\S+@\S+\.\S+/.test(email)) return showError('Please enter a valid email address.');
+    if (!phone || phone.length < 10)            return showError('Please enter a valid phone number.');
+    if (password.length < 6)                    return showError('Password must be at least 6 characters.');
+    if (!termsChecked)                          return showError('Please accept the Terms of Service to continue.');
+
+    btn.textContent = '✓ Account Created!';
+    btn.classList.add('success');
+    setTimeout(() => { window.location.href = 'home.html'; }, 1000);
+  }
+</script>
+</body>
+</html>
